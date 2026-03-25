@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerShell Ultimate Cheat Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --surface2: #161b2e;
+    --border: #1e2640;
+    --blue: #4fc3f7;
+    --cyan: #26c6da;
+    --green: #69f0ae;
+    --yellow: #ffd54f;
+    --orange: #ffab40;
+    --pink: #f48fb1;
+    --purple: #ce93d8;
+    --red: #ef9a9a;
+    --text: #e2e8f8;
+    --muted: #7a8ab0;
+    --accent: #4fc3f7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0d1526 0%, #0a1628 40%, #0e1a30 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 56px 48px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 600px 300px at 80% 50%, rgba(79,195,247,.07) 0%, transparent 70%),
+      radial-gradient(ellipse 300px 200px at 20% 80%, rgba(38,198,218,.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; max-width: 1200px; margin: 0 auto; }
+  .ps-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(79,195,247,.1); border: 1px solid rgba(79,195,247,.25);
+    border-radius: 4px; padding: 4px 12px; margin-bottom: 20px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--blue); letter-spacing: .08em; text-transform: uppercase;
+  }
+  .ps-badge span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+  h1 { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+  h1 em { font-style: normal; color: var(--blue); }
+  .hero-sub { margin-top: 12px; color: var(--muted); font-size: .95rem; max-width: 500px; }
+  .version-tag { display: inline-block; margin-top: 18px; font-family: 'JetBrains Mono', monospace; font-size: .75rem; color: var(--muted); border: 1px solid var(--border); padding: 3px 10px; border-radius: 3px; }
+
+  /* ── NAV ── */
+  .toc {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 48px;
+    position: sticky; top: 0; z-index: 100;
+    overflow-x: auto; white-space: nowrap;
+  }
+  .toc a {
+    display: inline-block; color: var(--muted); text-decoration: none;
+    font-size: .78rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    margin-right: 28px; padding: 4px 0;
+    border-bottom: 2px solid transparent; transition: color .2s, border-color .2s;
+  }
+  .toc a:hover { color: var(--blue); border-color: var(--blue); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 48px 48px 80px; }
+
+  /* ── SECTION ── */
+  .section { margin-bottom: 64px; }
+  .section-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-icon {
+    width: 34px; height: 34px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .section-header h2 {
+    font-size: 1.35rem; font-weight: 700; letter-spacing: -.01em;
+  }
+  .section-header .tag {
+    margin-left: auto; font-family: 'JetBrains Mono', monospace;
+    font-size: .68rem; color: var(--muted); border: 1px solid var(--border);
+    padding: 2px 8px; border-radius: 3px;
+  }
+
+  /* ── GRID ── */
+  .grid { display: grid; gap: 16px; }
+  .grid-2 { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .grid-1 { grid-template-columns: 1fr; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color .2s, transform .2s;
+  }
+  .card:hover { border-color: rgba(79,195,247,.3); transform: translateY(-1px); }
+  .card-head {
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2);
+  }
+  .card-head h3 { font-size: .82rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+  .card-head .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .card-body { padding: 14px 16px; }
+  p.desc { font-size: .82rem; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: #080c15;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+  .code-block + .code-block { margin-top: 6px; }
+  .ln { color: var(--muted); user-select: none; margin-right: 10px; display: inline-block; width: 18px; text-align: right; }
+
+  /* ── SYNTAX COLORS ── */
+  .kw  { color: var(--purple); }   /* keywords */
+  .cmd { color: var(--blue); }     /* cmdlets */
+  .str { color: var(--green); }    /* strings */
+  .var { color: var(--cyan); }     /* variables */
+  .op  { color: var(--orange); }   /* operators */
+  .cmt { color: #3d5070; font-style: italic; }  /* comments */
+  .num { color: var(--yellow); }   /* numbers */
+  .flag{ color: var(--pink); }     /* flags/params */
+  .typ { color: var(--orange); }   /* types */
+
+  /* ── INLINE TABLE ── */
+  .ref-table { width: 100%; border-collapse: collapse; font-size: .8rem; margin-top: 8px; }
+  .ref-table th { text-align: left; color: var(--muted); font-weight: 600; font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  .ref-table td { padding: 6px 10px; border-bottom: 1px solid rgba(30,38,64,.5); vertical-align: top; }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .ref-table td:first-child { font-family: 'JetBrains Mono', monospace; color: var(--cyan); white-space: nowrap; }
+  .ref-table td:last-child { color: var(--muted); }
+
+  /* ── NOTE / TIP ── */
+  .note {
+    margin-top: 10px; padding: 8px 12px;
+    border-left: 3px solid; border-radius: 0 4px 4px 0;
+    font-size: .78rem; display: flex; gap: 8px; align-items: flex-start;
+  }
+  .note.tip  { border-color: var(--green); background: rgba(105,240,174,.05); color: var(--green); }
+  .note.warn { border-color: var(--yellow); background: rgba(255,213,79,.05); color: var(--yellow); }
+  .note.info { border-color: var(--blue); background: rgba(79,195,247,.05); color: var(--blue); }
+  .note b { flex-shrink: 0; }
+
+  /* ── COLOR ACCENT CHIPS ── */
+  .chip {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem; padding: 2px 7px; border-radius: 3px; margin: 2px 2px 2px 0;
+  }
+  .chip-blue   { background: rgba(79,195,247,.12); color: var(--blue); }
+  .chip-green  { background: rgba(105,240,174,.12); color: var(--green); }
+  .chip-orange { background: rgba(255,171,64,.12); color: var(--orange); }
+  .chip-pink   { background: rgba(244,143,177,.12); color: var(--pink); }
+  .chip-purple { background: rgba(206,147,216,.12); color: var(--purple); }
+
+  /* ── SECTION COLORS ── */
+  .c-blue   { color: var(--blue); }
+  .c-green  { color: var(--green); }
+  .c-yellow { color: var(--yellow); }
+  .c-pink   { color: var(--pink); }
+  .c-purple { color: var(--purple); }
+  .c-orange { color: var(--orange); }
+  .c-cyan   { color: var(--cyan); }
+
+  .bg-blue   { background: rgba(79,195,247,.15); }
+  .bg-green  { background: rgba(105,240,174,.15); }
+  .bg-yellow { background: rgba(255,213,79,.15); }
+  .bg-pink   { background: rgba(244,143,177,.15); }
+  .bg-purple { background: rgba(206,147,216,.15); }
+  .bg-orange { background: rgba(255,171,64,.15); }
+  .bg-cyan   { background: rgba(38,198,218,.15); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border); padding: 24px 48px;
+    text-align: center; color: var(--muted); font-size: .75rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  @media(max-width: 640px){
+    .hero, .container, .toc, footer { padding-left: 20px; padding-right: 20px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="ps-badge"><span></span> PowerShell 7.x</div>
+    <h1>The <em>Ultimate</em><br>PowerShell Cheat Sheet</h1>
+    <p class="hero-sub">Everything from first cmdlet to advanced scripting — concise, visual, practical.</p>
+    <div class="version-tag">PS 7.4+ · Cross-platform · Last updated 2025</div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="toc">
+  <a href="#basics">Basics</a>
+  <a href="#variables">Variables</a>
+  <a href="#operators">Operators</a>
+  <a href="#strings">Strings</a>
+  <a href="#arrays">Arrays &amp; Hashtables</a>
+  <a href="#flow">Control Flow</a>
+  <a href="#functions">Functions</a>
+  <a href="#pipeline">Pipeline</a>
+  <a href="#filesystem">Filesystem</a>
+  <a href="#processes">Processes</a>
+  <a href="#regex">Regex</a>
+  <a href="#errors">Error Handling</a>
+  <a href="#classes">Classes &amp; OOP</a>
+  <a href="#modules">Modules</a>
+  <a href="#jobs">Jobs &amp; Async</a>
+  <a href="#remoting">Remoting</a>
+  <a href="#tips">Pro Tips</a>
+</nav>
+
+<div class="container">
+
+
+<!-- ══════════════════════════════════
+     1 · BASICS
+══════════════════════════════════ -->
+<section class="section" id="basics">
+  <div class="section-header">
+    <div class="section-icon bg-blue"><span>🔵</span></div>
+    <h2 class="c-blue">Basics & Getting Help</h2>
+    <span class="tag">beginner</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--blue)"></div><h3>Help System</h3></div>
+      <div class="card-body">
+        <p class="desc">PowerShell has rich built-in documentation — always check it first.</p>
+        <div class="code-block">
+<span class="cmt"># Update help files (run once as admin)</span>
+<span class="cmd">Update-Help</span>
+
+<span class="cmt"># Get help for a cmdlet</span>
+<span class="cmd">Get-Help</span> <span class="cmd">Get-Process</span>
+<span class="cmd">Get-Help</span> <span class="cmd">Get-Process</span> <span class="flag">-Examples</span>
+<span class="cmd">Get-Help</span> <span class="cmd">Get-Process</span> <span class="flag">-Full</span>
+<span class="cmd">Get-Help</span> <span class="flag">*network*</span>       <span class="cmt"># wildcard search</span>
+
+<span class="cmt"># Short alias</span>
+<span class="cmd">help</span> <span class="cmd">Get-Item</span>
+<span class="cmd">man</span>  <span class="cmd">Get-Item</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--blue)"></div><h3>Discovery Cmdlets</h3></div>
+      <div class="card-body">
+        <p class="desc">Find cmdlets, members, and commands without memorising names.</p>
+        <div class="code-block">
+<span class="cmt"># Find cmdlets by noun or verb</span>
+<span class="cmd">Get-Command</span> <span class="flag">-Noun</span> <span class="str">"Process"</span>
+<span class="cmd">Get-Command</span> <span class="flag">-Verb</span> <span class="str">"Get"</span>
+<span class="cmd">Get-Command</span> <span class="str">"*service*"</span>
+
+<span class="cmt"># Inspect object properties &amp; methods</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Get-Member</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Get-Member</span> <span class="flag">-MemberType</span> Method
+
+<span class="cmt"># Show all properties</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Select-Object</span> <span class="flag">-Property</span> *</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--cyan)"></div><h3>Profile & Version</h3></div>
+      <div class="card-body">
+        <p class="desc">Check your PowerShell version and manage the startup profile.</p>
+        <div class="code-block">
+<span class="cmt"># Version info</span>
+<span class="var">$PSVersionTable</span>
+
+<span class="cmt"># Open/edit profile (auto-runs on start)</span>
+<span class="cmd">notepad</span> <span class="var">$PROFILE</span>
+<span class="cmd">code</span>    <span class="var">$PROFILE</span>       <span class="cmt"># VS Code</span>
+
+<span class="cmt"># Where is the profile?</span>
+<span class="var">$PROFILE</span> | <span class="cmd">Format-List</span> *</div>
+        <div class="note tip"><b>💡</b> Profile path differs on Windows vs Linux/macOS — use $PROFILE to stay portable.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--cyan)"></div><h3>Execution Policy</h3></div>
+      <div class="card-body">
+        <p class="desc">Controls which scripts are allowed to run on the system.</p>
+        <div class="code-block">
+<span class="cmd">Get-ExecutionPolicy</span>
+<span class="cmd">Set-ExecutionPolicy</span> RemoteSigned <span class="cmt"># recommended</span>
+<span class="cmd">Set-ExecutionPolicy</span> Bypass <span class="flag">-Scope</span> Process</div>
+        <table class="ref-table" style="margin-top:10px">
+          <tr><th>Policy</th><th>Meaning</th></tr>
+          <tr><td>Restricted</td><td>No scripts (default on Windows)</td></tr>
+          <tr><td>RemoteSigned</td><td>Local scripts ok; downloaded must be signed</td></tr>
+          <tr><td>Unrestricted</td><td>All scripts run (warns on remote)</td></tr>
+          <tr><td>Bypass</td><td>Nothing blocked, no warnings</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     2 · VARIABLES
+══════════════════════════════════ -->
+<section class="section" id="variables">
+  <div class="section-header">
+    <div class="section-icon bg-cyan"><span>🟦</span></div>
+    <h2 class="c-cyan">Variables & Data Types</h2>
+    <span class="tag">beginner</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--cyan)"></div><h3>Declaring Variables</h3></div>
+      <div class="card-body">
+        <p class="desc">Variables start with <code style="color:var(--cyan)">$</code>. PowerShell infers types automatically.</p>
+        <div class="code-block">
+<span class="var">$name</span>   = <span class="str">"Alice"</span>
+<span class="var">$age</span>    = <span class="num">30</span>
+<span class="var">$pi</span>     = <span class="num">3.14</span>
+<span class="var">$active</span> = <span class="kw">$true</span>
+<span class="var">$empty</span>  = <span class="kw">$null</span>
+
+<span class="cmt"># Strongly-typed variable</span>
+[<span class="typ">int</span>]<span class="var">$count</span> = <span class="num">10</span>
+[<span class="typ">string</span>]<span class="var">$label</span> = <span class="str">"hello"</span>
+[<span class="typ">datetime</span>]<span class="var">$now</span> = <span class="cmd">Get-Date</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--cyan)"></div><h3>Special Variables</h3></div>
+      <div class="card-body">
+        <p class="desc">Built-in automatic variables always available in your session.</p>
+        <table class="ref-table">
+          <tr><th>Variable</th><th>Meaning</th></tr>
+          <tr><td>$_  / $PSItem</td><td>Current pipeline object</td></tr>
+          <tr><td>$?</td><td>Last command success (bool)</td></tr>
+          <tr><td>$LASTEXITCODE</td><td>Last native exit code</td></tr>
+          <tr><td>$Error</td><td>Array of recent errors</td></tr>
+          <tr><td>$args</td><td>Unnamed function args</td></tr>
+          <tr><td>$PSScriptRoot</td><td>Folder of running script</td></tr>
+          <tr><td>$HOME</td><td>User home directory</td></tr>
+          <tr><td>$env:PATH</td><td>Environment variable</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--green)"></div><h3>Type Casting & Checking</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Cast / convert type</span>
+[<span class="typ">int</span>]<span class="str">"42"</span>           <span class="cmt"># → 42</span>
+[<span class="typ">string</span>]<span class="num">100</span>       <span class="cmt"># → "100"</span>
+[<span class="typ">bool</span>]<span class="num">0</span>           <span class="cmt"># → False</span>
+
+<span class="cmt"># Check the type</span>
+<span class="var">$x</span> = <span class="num">5</span>
+<span class="var">$x</span>.GetType()
+<span class="var">$x</span> <span class="op">-is</span> [<span class="typ">int</span>]       <span class="cmt"># True</span>
+<span class="var">$x</span> <span class="op">-is</span> [<span class="typ">string</span>]    <span class="cmt"># False</span>
+<span class="var">$x</span> <span class="op">-isnot</span> [<span class="typ">string</span>] <span class="cmt"># True</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--green)"></div><h3>Scope</h3></div>
+      <div class="card-body">
+        <p class="desc">Control where variables live with scope modifiers.</p>
+        <div class="code-block">
+<span class="var">$local:x</span>   = <span class="num">1</span>   <span class="cmt"># current scope (default)</span>
+<span class="var">$script:x</span>  = <span class="num">2</span>   <span class="cmt"># script-wide</span>
+<span class="var">$global:x</span>  = <span class="num">3</span>   <span class="cmt"># entire session</span>
+<span class="var">$private:x</span> = <span class="num">4</span>   <span class="cmt"># not visible in child</span>
+
+<span class="cmt"># Env variables</span>
+<span class="var">$env:MY_VAR</span> = <span class="str">"hello"</span>
+<span class="cmd">Write-Host</span> <span class="var">$env:USERNAME</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     3 · OPERATORS
+══════════════════════════════════ -->
+<section class="section" id="operators">
+  <div class="section-header">
+    <div class="section-icon bg-yellow"><span>🟡</span></div>
+    <h2 class="c-yellow">Operators</h2>
+    <span class="tag">beginner</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--yellow)"></div><h3>Comparison Operators</h3></div>
+      <div class="card-body">
+        <p class="desc">All operators are case-insensitive by default. Prefix with <code style="color:var(--cyan)">c</code> for case-sensitive.</p>
+        <table class="ref-table">
+          <tr><th>Operator</th><th>Meaning</th></tr>
+          <tr><td>-eq / -ne</td><td>Equal / Not equal</td></tr>
+          <tr><td>-gt / -ge</td><td>Greater than / or equal</td></tr>
+          <tr><td>-lt / -le</td><td>Less than / or equal</td></tr>
+          <tr><td>-like</td><td>Wildcard match  (* ?)</td></tr>
+          <tr><td>-notlike</td><td>Wildcard NOT match</td></tr>
+          <tr><td>-match</td><td>Regex match</td></tr>
+          <tr><td>-in / -notin</td><td>Collection membership</td></tr>
+          <tr><td>-contains</td><td>Array contains value</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--yellow)"></div><h3>Logic & Arithmetic</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Logical</span>
+<span class="op">-and</span>  <span class="op">-or</span>  <span class="op">-not</span>  <span class="op">-xor</span>
+<span class="kw">!</span><span class="var">$flag</span>             <span class="cmt"># same as -not</span>
+
+<span class="cmt"># Arithmetic</span>
+<span class="num">5</span> <span class="op">+</span> <span class="num">3</span>    <span class="cmt"># 8</span>
+<span class="num">10</span> <span class="op">%</span> <span class="num">3</span>   <span class="cmt"># 1 (modulo)</span>
+<span class="num">2</span> <span class="op">**</span> <span class="num">8</span>   <span class="cmt"># 256 (power, PS7)</span>
+<span class="var">$x</span><span class="op">++</span>  <span class="var">$x</span><span class="op">--</span>  <span class="var">$x</span> <span class="op">+=</span> <span class="num">5</span>
+
+<span class="cmt"># Ternary (PS7+)</span>
+<span class="var">$r</span> = <span class="var">$age</span> <span class="op">-ge</span> <span class="num">18</span> ? <span class="str">"adult"</span> : <span class="str">"minor"</span>
+
+<span class="cmt"># Null-coalescing (PS7+)</span>
+<span class="var">$val</span> = <span class="var">$x</span> <span class="op">??</span> <span class="str">"default"</span>
+<span class="var">$x</span> <span class="op">??=</span> <span class="str">"fallback"</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     4 · STRINGS
+══════════════════════════════════ -->
+<section class="section" id="strings">
+  <div class="section-header">
+    <div class="section-icon bg-green"><span>🟢</span></div>
+    <h2 class="c-green">Strings</h2>
+    <span class="tag">beginner</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--green)"></div><h3>String Basics</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Double quotes expand variables</span>
+<span class="str">"Hello, </span><span class="var">$name</span><span class="str">!"</span>
+<span class="str">"Today: </span><span class="var">$(Get-Date)</span><span class="str">"</span>  <span class="cmt"># sub-expression</span>
+
+<span class="cmt"># Single quotes are literal</span>
+<span class="str">'No $expansion here'</span>
+
+<span class="cmt"># Here-strings (multiline)</span>
+<span class="var">$text</span> = <span class="op">@"</span>
+<span class="str">Line one
+Line two with </span><span class="var">$name</span>
+<span class="op">"@</span>
+
+<span class="cmt"># Literal here-string</span>
+<span class="var">$raw</span> = <span class="op">@'</span>
+<span class="str">No expansion: $var</span>
+<span class="op">'@</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--green)"></div><h3>String Methods</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="var">$s</span> = <span class="str">"  Hello World  "</span>
+
+<span class="var">$s</span>.ToUpper()          <span class="cmt"># HELLO WORLD</span>
+<span class="var">$s</span>.ToLower()          <span class="cmt"># hello world</span>
+<span class="var">$s</span>.Trim()             <span class="cmt"># "Hello World"</span>
+<span class="var">$s</span>.TrimStart()
+<span class="var">$s</span>.TrimEnd()
+<span class="var">$s</span>.Replace(<span class="str">"World"</span>,<span class="str">"PS"</span>)
+<span class="var">$s</span>.Split(<span class="str">" "</span>)         <span class="cmt"># array</span>
+<span class="var">$s</span>.Contains(<span class="str">"Hello"</span>)  <span class="cmt"># True</span>
+<span class="var">$s</span>.StartsWith(<span class="str">"  H"</span>)  <span class="cmt"># True</span>
+<span class="var">$s</span>.Substring(<span class="num">2</span>, <span class="num">5</span>)    <span class="cmt"># "Hello"</span>
+<span class="var">$s</span>.Length             <span class="cmt"># property</span>
+<span class="var">$s</span>.IndexOf(<span class="str">"W"</span>)       <span class="cmt"># position</span>
+
+<span class="cmt"># Format string</span>
+<span class="str">"{0} is {1}"</span> <span class="op">-f</span> <span class="str">"PS"</span>, <span class="num">7</span>  <span class="cmt"># "PS is 7"</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     5 · ARRAYS & HASHTABLES
+══════════════════════════════════ -->
+<section class="section" id="arrays">
+  <div class="section-header">
+    <div class="section-icon bg-orange"><span>🟠</span></div>
+    <h2 class="c-orange">Arrays & Hashtables</h2>
+    <span class="tag">beginner</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--orange)"></div><h3>Arrays</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Create</span>
+<span class="var">$arr</span> = <span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>
+<span class="var">$arr</span> = @(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>)
+<span class="var">$arr</span> = <span class="num">1</span>..<span class="num">10</span>          <span class="cmt"># range 1-10</span>
+
+<span class="cmt"># Access</span>
+<span class="var">$arr</span>[<span class="num">0</span>]               <span class="cmt"># first</span>
+<span class="var">$arr</span>[<span class="op">-1</span>]              <span class="cmt"># last</span>
+<span class="var">$arr</span>[<span class="num">1</span>..<span class="num">3</span>]            <span class="cmt"># slice</span>
+
+<span class="cmt"># Modify (fixed-size; use += to grow)</span>
+<span class="var">$arr</span> <span class="op">+=</span> <span class="num">4</span>
+<span class="var">$arr</span>.Count
+
+<span class="cmt"># ArrayList (efficient add/remove)</span>
+<span class="var">$list</span> = [<span class="typ">System.Collections.ArrayList</span>]@()
+<span class="var">$list</span>.Add(<span class="str">"item"</span>)
+<span class="var">$list</span>.Remove(<span class="str">"item"</span>)
+
+<span class="cmt"># Generic List (PS7 preferred)</span>
+<span class="var">$list</span> = [<span class="typ">System.Collections.Generic.List[string]</span>]::new()</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--orange)"></div><h3>Hashtables</h3></div>
+      <div class="card-body">
+        <p class="desc">Key-value pairs — like dictionaries in other languages.</p>
+        <div class="code-block">
+<span class="cmt"># Create</span>
+<span class="var">$ht</span> = @{
+    Name  = <span class="str">"Alice"</span>
+    Age   = <span class="num">30</span>
+    Admin = <span class="kw">$true</span>
+}
+
+<span class="cmt"># Access</span>
+<span class="var">$ht</span>.Name           <span class="cmt"># "Alice"</span>
+<span class="var">$ht</span>[<span class="str">"Age"</span>]         <span class="cmt"># 30</span>
+
+<span class="cmt"># Add / update / remove</span>
+<span class="var">$ht</span>.City = <span class="str">"NYC"</span>
+<span class="var">$ht</span>.Remove(<span class="str">"Admin"</span>)
+
+<span class="cmt"># Check key existence</span>
+<span class="var">$ht</span>.ContainsKey(<span class="str">"Name"</span>)
+
+<span class="cmt"># Ordered hashtable</span>
+<span class="var">$ord</span> = [<span class="typ">ordered</span>]@{ A=<span class="num">1</span>; B=<span class="num">2</span>; C=<span class="num">3</span> }
+
+<span class="cmt"># Iterate</span>
+<span class="kw">foreach</span> (<span class="var">$k</span> <span class="kw">in</span> <span class="var">$ht</span>.Keys) {
+    <span class="str">"</span><span class="var">$k</span><span class="str"> = </span><span class="var">$($ht[$k])</span><span class="str">"</span>
+}</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     6 · CONTROL FLOW
+══════════════════════════════════ -->
+<section class="section" id="flow">
+  <div class="section-header">
+    <div class="section-icon bg-purple"><span>🟣</span></div>
+    <h2 class="c-purple">Control Flow</h2>
+    <span class="tag">beginner</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--purple)"></div><h3>If / Else</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="kw">if</span> (<span class="var">$age</span> <span class="op">-ge</span> <span class="num">18</span>) {
+    <span class="str">"Adult"</span>
+} <span class="kw">elseif</span> (<span class="var">$age</span> <span class="op">-ge</span> <span class="num">13</span>) {
+    <span class="str">"Teen"</span>
+} <span class="kw">else</span> {
+    <span class="str">"Child"</span>
+}
+
+<span class="cmt"># Switch (powerful pattern matching)</span>
+<span class="kw">switch</span> (<span class="var">$color</span>) {
+    <span class="str">"red"</span>   { <span class="str">"Stop"</span>  }
+    <span class="str">"green"</span> { <span class="str">"Go"</span>    }
+    <span class="kw">Default</span> { <span class="str">"Other"</span> }
+}
+
+<span class="cmt"># Switch with regex</span>
+<span class="kw">switch</span> <span class="flag">-Regex</span> (<span class="var">$input</span>) {
+    <span class="str">'^d+'</span> { <span class="str">"Number"</span>  }
+    <span class="str">'^[a-z]+'</span> { <span class="str">"Word"</span> }
+}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--purple)"></div><h3>Loops</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># foreach — iterate collection</span>
+<span class="kw">foreach</span> (<span class="var">$item</span> <span class="kw">in</span> <span class="var">$arr</span>) { <span class="var">$item</span> }
+
+<span class="cmt"># for — index-based</span>
+<span class="kw">for</span> (<span class="var">$i</span>=<span class="num">0</span>; <span class="var">$i</span> <span class="op">-lt</span> <span class="num">5</span>; <span class="var">$i</span><span class="op">++</span>) { <span class="var">$i</span> }
+
+<span class="cmt"># while</span>
+<span class="kw">while</span> (<span class="var">$x</span> <span class="op">-gt</span> <span class="num">0</span>) { <span class="var">$x</span><span class="op">--</span> }
+
+<span class="cmt"># do-while / do-until</span>
+<span class="kw">do</span> { <span class="var">$x</span><span class="op">++</span> } <span class="kw">while</span> (<span class="var">$x</span> <span class="op">-lt</span> <span class="num">5</span>)
+<span class="kw">do</span> { <span class="var">$x</span><span class="op">++</span> } <span class="kw">until</span> (<span class="var">$x</span> <span class="op">-ge</span> <span class="num">5</span>)
+
+<span class="cmt"># Loop control</span>
+<span class="kw">break</span>               <span class="cmt"># exit loop</span>
+<span class="kw">continue</span>            <span class="cmt"># skip iteration</span>
+<span class="kw">return</span>              <span class="cmt"># exit function</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     7 · FUNCTIONS
+══════════════════════════════════ -->
+<section class="section" id="functions">
+  <div class="section-header">
+    <div class="section-icon bg-pink"><span>🩷</span></div>
+    <h2 class="c-pink">Functions & Parameters</h2>
+    <span class="tag">intermediate</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--pink)"></div><h3>Basic Functions</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="kw">function</span> <span class="cmd">Say-Hello</span> {
+    <span class="kw">param</span>(
+        [<span class="typ">string</span>]<span class="var">$Name</span> = <span class="str">"World"</span>,   <span class="cmt"># default</span>
+        [<span class="typ">int</span>]<span class="var">$Times</span>   = <span class="num">1</span>
+    )
+    <span class="num">1</span>..<span class="var">$Times</span> | <span class="cmd">ForEach-Object</span> {
+        <span class="cmd">Write-Host</span> <span class="str">"Hello, </span><span class="var">$Name</span><span class="str">!"</span>
+    }
+}
+
+<span class="cmt"># Call it</span>
+<span class="cmd">Say-Hello</span>
+<span class="cmd">Say-Hello</span> <span class="flag">-Name</span> <span class="str">"Alice"</span> <span class="flag">-Times</span> <span class="num">3</span>
+
+<span class="cmt"># Return values</span>
+<span class="kw">function</span> <span class="cmd">Get-Square</span>([<span class="typ">int</span>]<span class="var">$n</span>) {
+    <span class="kw">return</span> <span class="var">$n</span> <span class="op">*</span> <span class="var">$n</span>      <span class="cmt"># explicit</span>
+    <span class="cmt"># or just: $n * $n   (implicit)</span>
+}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--pink)"></div><h3>Advanced Parameters</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="kw">function</span> <span class="cmd">Deploy-App</span> {
+    [<span class="typ">CmdletBinding</span>()]           <span class="cmt"># adds -Verbose, -WhatIf etc</span>
+    <span class="kw">param</span>(
+        <span class="cmt"># Mandatory param</span>
+        [<span class="typ">Parameter(Mandatory)</span>]
+        [<span class="typ">string</span>]<span class="var">$AppName</span>,
+
+        <span class="cmt"># Validated param</span>
+        [<span class="typ">ValidateSet</span>(<span class="str">"dev"</span>,<span class="str">"staging"</span>,<span class="str">"prod"</span>)]
+        [<span class="typ">string</span>]<span class="var">$Env</span> = <span class="str">"dev"</span>,
+
+        <span class="cmt"># Switch (boolean flag)</span>
+        [<span class="typ">switch</span>]<span class="var">$Force</span>,
+
+        <span class="cmt"># Accept pipeline input</span>
+        [<span class="typ">Parameter(ValueFromPipeline)</span>]
+        [<span class="typ">string</span>]<span class="var">$Config</span>
+    )
+    <span class="kw">if</span> (<span class="var">$Force</span>) { <span class="cmd">Write-Verbose</span> <span class="str">"Forcing..."</span> }
+}</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     8 · PIPELINE
+══════════════════════════════════ -->
+<section class="section" id="pipeline">
+  <div class="section-header">
+    <div class="section-icon bg-blue"><span>🔷</span></div>
+    <h2 class="c-blue">Pipeline</h2>
+    <span class="tag">intermediate</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--blue)"></div><h3>Core Pipeline Cmdlets</h3></div>
+      <div class="card-body">
+        <p class="desc">Chain commands with <code style="color:var(--blue)">|</code> — each passes objects to the next.</p>
+        <div class="code-block">
+<span class="cmt"># Where-Object — filter</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Where-Object</span> { <span class="var">$_</span>.CPU <span class="op">-gt</span> <span class="num">100</span> }
+<span class="cmd">Get-Process</span> | <span class="cmd">Where-Object</span> CPU <span class="op">-gt</span> <span class="num">100</span>  <span class="cmt"># simplified</span>
+
+<span class="cmt"># Select-Object — choose properties</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Select-Object</span> Name, CPU
+<span class="cmd">Get-Process</span> | <span class="cmd">Select-Object</span> <span class="flag">-First</span> <span class="num">5</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Select-Object</span> <span class="flag">-Last</span> <span class="num">3</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Select-Object</span> <span class="flag">-Unique</span>
+
+<span class="cmt"># ForEach-Object — process each</span>
+<span class="num">1</span>..<span class="num">5</span> | <span class="cmd">ForEach-Object</span> { <span class="var">$_</span> <span class="op">*</span> <span class="num">2</span> }
+<span class="num">1</span>..<span class="num">5</span> | <span class="cmd">ForEach-Object</span> <span class="flag">-Parallel</span> { <span class="var">$_</span> <span class="op">*</span> <span class="num">2</span> }  <span class="cmt"># PS7!</span>
+
+<span class="cmt"># Sort-Object</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Sort-Object</span> CPU <span class="flag">-Descending</span>
+
+<span class="cmt"># Group-Object</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Group-Object</span> Company</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--blue)"></div><h3>Output & Formatting</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Format output</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Format-Table</span> <span class="flag">-AutoSize</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Format-List</span> *
+<span class="cmd">Get-Process</span> | <span class="cmd">Format-Wide</span> Name
+
+<span class="cmt"># Output to file</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Out-File</span> procs.txt
+<span class="cmd">Get-Process</span> | <span class="cmd">Export-Csv</span> procs.csv <span class="flag">-NoTypeInformation</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">ConvertTo-Json</span> | <span class="cmd">Out-File</span> procs.json
+
+<span class="cmt"># Measure</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Measure-Object</span> CPU <span class="flag">-Sum</span> <span class="flag">-Average</span>
+
+<span class="cmt"># Tee (fork: screen + file)</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Tee-Object</span> procs.txt | <span class="cmd">Select-Object</span> <span class="flag">-First</span> <span class="num">5</span>
+
+<span class="cmt"># Suppress output</span>
+<span class="cmd">Some-Command</span> | <span class="cmd">Out-Null</span>
+<span class="var">$null</span> = <span class="cmd">Some-Command</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     9 · FILESYSTEM
+══════════════════════════════════ -->
+<section class="section" id="filesystem">
+  <div class="section-header">
+    <div class="section-icon bg-green"><span>📁</span></div>
+    <h2 class="c-green">Filesystem & I/O</h2>
+    <span class="tag">intermediate</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--green)"></div><h3>Navigation & Listing</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmd">Get-Location</span>              <span class="cmt"># pwd</span>
+<span class="cmd">Set-Location</span> C:\Users       <span class="cmt"># cd</span>
+<span class="cmd">Push-Location</span> C:\Temp       <span class="cmt"># cd + save</span>
+<span class="cmd">Pop-Location</span>                <span class="cmt"># go back</span>
+
+<span class="cmd">Get-ChildItem</span>               <span class="cmt"># ls / dir</span>
+<span class="cmd">Get-ChildItem</span> <span class="flag">-Recurse</span>      <span class="cmt"># all subdirs</span>
+<span class="cmd">Get-ChildItem</span> <span class="flag">-Filter</span> <span class="str">*.log</span>
+<span class="cmd">Get-ChildItem</span> <span class="flag">-Hidden</span>       <span class="cmt"># hidden items</span>
+<span class="cmd">Get-ChildItem</span> <span class="flag">-File</span>         <span class="cmt"># files only</span>
+<span class="cmd">Get-ChildItem</span> <span class="flag">-Directory</span>    <span class="cmt"># dirs only</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--green)"></div><h3>File Operations</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Create</span>
+<span class="cmd">New-Item</span> file.txt <span class="flag">-ItemType</span> File
+<span class="cmd">New-Item</span> mydir    <span class="flag">-ItemType</span> Directory
+
+<span class="cmt"># Read / Write</span>
+<span class="cmd">Get-Content</span> file.txt           <span class="cmt"># read all</span>
+<span class="cmd">Get-Content</span> file.txt <span class="flag">-Tail</span> <span class="num">10</span>  <span class="cmt"># last N lines</span>
+<span class="cmd">Set-Content</span> file.txt <span class="str">"hello"</span>   <span class="cmt"># overwrite</span>
+<span class="cmd">Add-Content</span> file.txt <span class="str">"world"</span>   <span class="cmt"># append</span>
+
+<span class="cmt"># Copy / Move / Delete</span>
+<span class="cmd">Copy-Item</span> a.txt b.txt
+<span class="cmd">Move-Item</span> a.txt C:\dest\
+<span class="cmd">Remove-Item</span> file.txt <span class="flag">-Force</span>
+<span class="cmd">Remove-Item</span> mydir <span class="flag">-Recurse</span> <span class="flag">-Force</span>
+
+<span class="cmt"># Test existence</span>
+<span class="cmd">Test-Path</span> C:\temp\file.txt</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--cyan)"></div><h3>JSON & CSV</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># JSON</span>
+<span class="var">$data</span> = <span class="cmd">Get-Content</span> data.json | <span class="cmd">ConvertFrom-Json</span>
+<span class="var">$data</span> | <span class="cmd">ConvertTo-Json</span> <span class="flag">-Depth</span> <span class="num">5</span> | <span class="cmd">Set-Content</span> out.json
+
+<span class="cmt"># CSV</span>
+<span class="var">$csv</span>  = <span class="cmd">Import-Csv</span> data.csv
+<span class="var">$objs</span> | <span class="cmd">Export-Csv</span> out.csv <span class="flag">-NoTypeInformation</span>
+
+<span class="cmt"># XML</span>
+[<span class="typ">xml</span>]<span class="var">$xml</span> = <span class="cmd">Get-Content</span> config.xml
+<span class="var">$xml</span>.root.item</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--cyan)"></div><h3>Paths & Joins</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Safe path joining (cross-platform)</span>
+<span class="cmd">Join-Path</span> C:\Users Alice Documents
+
+<span class="cmt"># Path manipulation</span>
+<span class="cmd">Split-Path</span> C:\Folder\file.txt          <span class="cmt"># C:\Folder</span>
+<span class="cmd">Split-Path</span> C:\Folder\file.txt <span class="flag">-Leaf</span>  <span class="cmt"># file.txt</span>
+<span class="cmd">Resolve-Path</span> .\relative\path
+[<span class="typ">System.IO.Path</span>]::GetExtension(<span class="str">"f.txt"</span>) <span class="cmt"># .txt</span>
+
+<span class="cmt"># Common path variables</span>
+<span class="var">$env:TEMP</span>
+<span class="var">$env:USERPROFILE</span>   <span class="cmt"># ~ on Windows</span>
+<span class="var">$PSScriptRoot</span>      <span class="cmt"># script's folder</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     10 · PROCESSES
+══════════════════════════════════ -->
+<section class="section" id="processes">
+  <div class="section-header">
+    <div class="section-icon bg-yellow"><span>⚙️</span></div>
+    <h2 class="c-yellow">Processes & Services</h2>
+    <span class="tag">intermediate</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--yellow)"></div><h3>Processes</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmd">Get-Process</span>
+<span class="cmd">Get-Process</span> <span class="flag">-Name</span> chrome
+<span class="cmd">Get-Process</span> | <span class="cmd">Sort-Object</span> WS <span class="flag">-Desc</span> | <span class="cmd">Select-Object</span> <span class="flag">-First</span> <span class="num">5</span>
+
+<span class="cmt"># Start a process</span>
+<span class="cmd">Start-Process</span> notepad
+<span class="cmd">Start-Process</span> <span class="str">"cmd"</span> <span class="flag">-ArgumentList</span> <span class="str">"/c dir"</span> <span class="flag">-Wait</span>
+
+<span class="cmt"># Stop a process</span>
+<span class="cmd">Stop-Process</span> <span class="flag">-Name</span> notepad
+<span class="cmd">Stop-Process</span> <span class="flag">-Id</span> <span class="num">1234</span> <span class="flag">-Force</span>
+
+<span class="cmt"># Wait for a process</span>
+<span class="cmd">Wait-Process</span> <span class="flag">-Name</span> setup</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--yellow)"></div><h3>Services</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmd">Get-Service</span>
+<span class="cmd">Get-Service</span> <span class="flag">-Name</span> WinRM
+
+<span class="cmd">Start-Service</span> <span class="flag">-Name</span> Spooler
+<span class="cmd">Stop-Service</span>  <span class="flag">-Name</span> Spooler
+<span class="cmd">Restart-Service</span> <span class="flag">-Name</span> WinRM
+
+<span class="cmd">Set-Service</span> <span class="flag">-Name</span> Spooler <span class="flag">-StartupType</span> Automatic
+
+<span class="cmt"># Filter by status</span>
+<span class="cmd">Get-Service</span> | <span class="cmd">Where-Object</span> Status <span class="op">-eq</span> <span class="str">"Running"</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     11 · REGEX
+══════════════════════════════════ -->
+<section class="section" id="regex">
+  <div class="section-header">
+    <div class="section-icon bg-purple"><span>🔍</span></div>
+    <h2 class="c-purple">Regular Expressions</h2>
+    <span class="tag">intermediate</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--purple)"></div><h3>Match & Replace</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># -match puts captures in $Matches</span>
+<span class="str">"hello123"</span> <span class="op">-match</span> <span class="str">'\d+'</span>      <span class="cmt"># True</span>
+<span class="var">$Matches</span>[<span class="num">0</span>]                    <span class="cmt"># "123"</span>
+
+<span class="cmt"># Named groups</span>
+<span class="str">"John 30"</span> <span class="op">-match</span> <span class="str">'(?&lt;name&gt;\w+) (?&lt;age&gt;\d+)'</span>
+<span class="var">$Matches</span>.name    <span class="cmt"># "John"</span>
+<span class="var">$Matches</span>.age     <span class="cmt"># "30"</span>
+
+<span class="cmt"># -replace</span>
+<span class="str">"hello world"</span> <span class="op">-replace</span> <span class="str">'o'</span>, <span class="str">'0'</span>   <span class="cmt"># hell0 w0rld</span>
+<span class="str">"2024-01-15"</span>  <span class="op">-replace</span> <span class="str">'(\d{4})-(\d{2})-(\d{2})'</span>, <span class="str">'$3/$2/$1'</span>
+
+<span class="cmt"># Select-String (grep)</span>
+<span class="cmd">Select-String</span> <span class="flag">-Path</span> *.log <span class="flag">-Pattern</span> <span class="str">"ERROR"</span>
+<span class="cmd">Get-Content</span> app.log | <span class="cmd">Select-String</span> <span class="str">"WARN|ERROR"</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--purple)"></div><h3>Common Patterns</h3></div>
+      <div class="card-body">
+        <table class="ref-table">
+          <tr><th>Pattern</th><th>Matches</th></tr>
+          <tr><td>\d+</td><td>One or more digits</td></tr>
+          <tr><td>\w+</td><td>Word characters</td></tr>
+          <tr><td>\s+</td><td>Whitespace</td></tr>
+          <tr><td>^text</td><td>Starts with "text"</td></tr>
+          <tr><td>text$</td><td>Ends with "text"</td></tr>
+          <tr><td>.</td><td>Any character</td></tr>
+          <tr><td>[a-z]</td><td>Char class</td></tr>
+          <tr><td>(a|b)</td><td>Alternation</td></tr>
+          <tr><td>a{3}</td><td>Exactly 3 a's</td></tr>
+          <tr><td>(?i)</td><td>Case-insensitive flag</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     12 · ERROR HANDLING
+══════════════════════════════════ -->
+<section class="section" id="errors">
+  <div class="section-header">
+    <div class="section-icon bg-pink"><span>🚨</span></div>
+    <h2 class="c-pink">Error Handling</h2>
+    <span class="tag">intermediate</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--pink)"></div><h3>Try / Catch / Finally</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="kw">try</span> {
+    <span class="cmd">Get-Item</span> <span class="str">"nonexistent"</span> <span class="flag">-ErrorAction</span> Stop
+}
+<span class="kw">catch</span> [<span class="typ">System.IO.FileNotFoundException</span>] {
+    <span class="cmd">Write-Host</span> <span class="str">"File not found!"</span>
+}
+<span class="kw">catch</span> {
+    <span class="cmd">Write-Host</span> <span class="str">"Error: </span><span class="var">$($_.Exception.Message)</span><span class="str">"</span>
+    <span class="cmd">Write-Host</span> <span class="str">"Line:  </span><span class="var">$($_.InvocationInfo.ScriptLineNumber)</span><span class="str">"</span>
+}
+<span class="kw">finally</span> {
+    <span class="cmt"># always runs (cleanup)</span>
+    <span class="cmd">Write-Host</span> <span class="str">"Done."</span>
+}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--pink)"></div><h3>Error Preferences</h3></div>
+      <div class="card-body">
+        <p class="desc">Control how errors behave per command or globally.</p>
+        <div class="code-block">
+<span class="cmt"># Per-command</span>
+<span class="cmd">Get-Item</span> x <span class="flag">-ErrorAction</span> Stop        <span class="cmt"># throw</span>
+<span class="cmd">Get-Item</span> x <span class="flag">-ErrorAction</span> SilentlyContinue <span class="cmt"># hide</span>
+<span class="cmd">Get-Item</span> x <span class="flag">-ErrorAction</span> Ignore        <span class="cmt"># ignore</span>
+<span class="cmd">Get-Item</span> x <span class="flag">-ErrorVariable</span> err         <span class="cmt"># capture</span>
+
+<span class="cmt"># Global preference</span>
+<span class="var">$ErrorActionPreference</span> = <span class="str">"Stop"</span>    <span class="cmt"># script-wide</span>
+<span class="var">$ErrorActionPreference</span> = <span class="str">"Continue"</span> <span class="cmt"># default</span>
+
+<span class="cmt"># Custom errors</span>
+<span class="kw">throw</span> <span class="str">"Something went wrong"</span>
+<span class="cmd">Write-Error</span> <span class="str">"Non-terminating error"</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     13 · CLASSES & OOP
+══════════════════════════════════ -->
+<section class="section" id="classes">
+  <div class="section-header">
+    <div class="section-icon bg-orange"><span>🔶</span></div>
+    <h2 class="c-orange">Classes & OOP (PS5+)</h2>
+    <span class="tag">advanced</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--orange)"></div><h3>Class Definition</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="kw">class</span> <span class="typ">Animal</span> {
+    <span class="cmt"># Properties</span>
+    [<span class="typ">string</span>]<span class="var">$Name</span>
+    [<span class="typ">int</span>]<span class="var">$Age</span>
+
+    <span class="cmt"># Constructor</span>
+    <span class="typ">Animal</span>([<span class="typ">string</span>]<span class="var">$name</span>, [<span class="typ">int</span>]<span class="var">$age</span>) {
+        <span class="var">$this</span>.Name = <span class="var">$name</span>
+        <span class="var">$this</span>.Age  = <span class="var">$age</span>
+    }
+
+    <span class="cmt"># Method</span>
+    [<span class="typ">string</span>] Speak() {
+        <span class="kw">return</span> <span class="str">"</span><span class="var">$($this.Name)</span><span class="str"> says hi"</span>
+    }
+}
+
+<span class="cmt"># Inheritance</span>
+<span class="kw">class</span> <span class="typ">Dog</span> : <span class="typ">Animal</span> {
+    [<span class="typ">string</span>] Speak() { <span class="kw">return</span> <span class="str">"Woof!"</span> }
+}
+
+<span class="cmt"># Instantiate</span>
+<span class="var">$d</span> = [<span class="typ">Dog</span>]::new(<span class="str">"Rex"</span>, <span class="num">3</span>)
+<span class="var">$d</span>.Speak()</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--orange)"></div><h3>Enums & Static Members</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Enum</span>
+<span class="kw">enum</span> <span class="typ">Color</span> { Red; Green; Blue }
+[<span class="typ">Color</span>]::Red
+<span class="var">$c</span> = [<span class="typ">Color</span>]::Green
+<span class="var">$c</span> <span class="op">-eq</span> [<span class="typ">Color</span>]::Green   <span class="cmt"># True</span>
+
+<span class="cmt"># Static members</span>
+<span class="kw">class</span> <span class="typ">MathHelper</span> {
+    <span class="kw">static</span> [<span class="typ">double</span>] Square([<span class="typ">double</span>]<span class="var">$x</span>) {
+        <span class="kw">return</span> <span class="var">$x</span> <span class="op">*</span> <span class="var">$x</span>
+    }
+}
+[<span class="typ">MathHelper</span>]::Square(<span class="num">5</span>)   <span class="cmt"># 25</span>
+
+<span class="cmt"># .NET types directly</span>
+[<span class="typ">System.Math</span>]::Sqrt(<span class="num">144</span>)   <span class="cmt"># 12</span>
+[<span class="typ">System.Math</span>]::PI</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     14 · MODULES
+══════════════════════════════════ -->
+<section class="section" id="modules">
+  <div class="section-header">
+    <div class="section-icon bg-blue"><span>📦</span></div>
+    <h2 class="c-blue">Modules & Packages</h2>
+    <span class="tag">intermediate</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--blue)"></div><h3>Module Management</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Find modules in PSGallery</span>
+<span class="cmd">Find-Module</span> <span class="flag">-Name</span> <span class="str">"*Azure*"</span>
+
+<span class="cmt"># Install</span>
+<span class="cmd">Install-Module</span> Pester <span class="flag">-Scope</span> CurrentUser
+<span class="cmd">Install-Module</span> Az <span class="flag">-Force</span>
+
+<span class="cmt"># List installed</span>
+<span class="cmd">Get-Module</span> <span class="flag">-ListAvailable</span>
+
+<span class="cmt"># Import / Remove</span>
+<span class="cmd">Import-Module</span> Pester
+<span class="cmd">Remove-Module</span> Pester
+
+<span class="cmt"># Update / Uninstall</span>
+<span class="cmd">Update-Module</span> Pester
+<span class="cmd">Uninstall-Module</span> Pester</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--blue)"></div><h3>Write Your Own Module</h3></div>
+      <div class="card-body">
+        <p class="desc">A <code style="color:var(--cyan)">.psm1</code> file is a module. Use a <code style="color:var(--cyan)">.psd1</code> manifest for metadata.</p>
+        <div class="code-block">
+<span class="cmt"># MyModule.psm1</span>
+<span class="kw">function</span> <span class="cmd">Get-Greeting</span>([<span class="typ">string</span>]<span class="var">$Name</span>) {
+    <span class="str">"Hello, </span><span class="var">$Name</span><span class="str">!"</span>
+}
+
+<span class="cmd">Export-ModuleMember</span> <span class="flag">-Function</span> <span class="str">"Get-Greeting"</span>
+
+<span class="cmt"># Import it</span>
+<span class="cmd">Import-Module</span> .\MyModule.psm1
+
+<span class="cmt"># Create manifest</span>
+<span class="cmd">New-ModuleManifest</span> MyModule.psd1 <span class="flag">-RootModule</span> MyModule.psm1 <span class="flag">-Author</span> <span class="str">"You"</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     15 · JOBS & ASYNC
+══════════════════════════════════ -->
+<section class="section" id="jobs">
+  <div class="section-header">
+    <div class="section-icon bg-cyan"><span>⚡</span></div>
+    <h2 class="c-cyan">Jobs & Parallelism</h2>
+    <span class="tag">advanced</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--cyan)"></div><h3>Background Jobs</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Start a background job</span>
+<span class="var">$job</span> = <span class="cmd">Start-Job</span> <span class="flag">-ScriptBlock</span> {
+    <span class="cmd">Start-Sleep</span> <span class="num">3</span>
+    <span class="str">"Done!"</span>
+}
+
+<span class="cmt"># Check / wait</span>
+<span class="cmd">Get-Job</span>
+<span class="cmd">Wait-Job</span> <span class="var">$job</span>
+
+<span class="cmt"># Get results</span>
+<span class="cmd">Receive-Job</span> <span class="var">$job</span>
+<span class="cmd">Receive-Job</span> <span class="var">$job</span> <span class="flag">-Keep</span>    <span class="cmt"># don't clear</span>
+
+<span class="cmt"># Cleanup</span>
+<span class="cmd">Remove-Job</span> <span class="var">$job</span>
+<span class="cmd">Get-Job</span> | <span class="cmd">Remove-Job</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--cyan)"></div><h3>ForEach-Object -Parallel (PS7)</h3></div>
+      <div class="card-body">
+        <p class="desc">Run pipeline items in parallel — fastest way to scale loops in PS7.</p>
+        <div class="code-block">
+<span class="cmt"># Parallel processing (PS7+)</span>
+<span class="num">1</span>..<span class="num">10</span> | <span class="cmd">ForEach-Object</span> <span class="flag">-Parallel</span> {
+    <span class="str">"Processing </span><span class="var">$_</span><span class="str">"</span>
+    <span class="cmd">Start-Sleep</span> <span class="num">1</span>
+} <span class="flag">-ThrottleLimit</span> <span class="num">5</span>   <span class="cmt"># max 5 at once</span>
+
+<span class="cmt"># Pass external vars with $using:</span>
+<span class="var">$prefix</span> = <span class="str">"item"</span>
+<span class="num">1</span>..<span class="num">5</span> | <span class="cmd">ForEach-Object</span> <span class="flag">-Parallel</span> {
+    <span class="str">"</span><span class="var">$using:prefix</span><span class="str">_</span><span class="var">$_</span><span class="str">"</span>
+}</div>
+        <div class="note warn"><b>⚠️</b> Each parallel thread is isolated — use $using: to access outer variables.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--green)"></div><h3>Runspaces (Advanced)</h3></div>
+      <div class="card-body">
+        <p class="desc">Low-level, high-performance parallelism for scripts that need maximum speed.</p>
+        <div class="code-block">
+<span class="var">$pool</span> = [<span class="typ">RunspaceFactory</span>]::CreateRunspacePool(<span class="num">1</span>, <span class="num">5</span>)
+<span class="var">$pool</span>.Open()
+
+<span class="var">$ps</span> = [<span class="typ">PowerShell</span>]::Create()
+<span class="var">$ps</span>.RunspacePool = <span class="var">$pool</span>
+<span class="var">$ps</span>.AddScript({ <span class="str">"hello from runspace"</span> })
+
+<span class="var">$handle</span> = <span class="var">$ps</span>.BeginInvoke()
+<span class="var">$result</span> = <span class="var">$ps</span>.EndInvoke(<span class="var">$handle</span>)
+<span class="var">$ps</span>.Dispose()
+<span class="var">$pool</span>.Close()</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--green)"></div><h3>Scheduled Tasks</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Create a scheduled task (Windows)</span>
+<span class="var">$action</span>  = <span class="cmd">New-ScheduledTaskAction</span> <span class="flag">-Execute</span> <span class="str">"pwsh"</span> <span class="flag">-Argument</span> <span class="str">"script.ps1"</span>
+<span class="var">$trigger</span> = <span class="cmd">New-ScheduledTaskTrigger</span> <span class="flag">-Daily</span> <span class="flag">-At</span> <span class="str">"08:00"</span>
+<span class="cmd">Register-ScheduledTask</span> <span class="flag">-TaskName</span> <span class="str">"MyJob"</span> <span class="flag">-Action</span> <span class="var">$action</span> <span class="flag">-Trigger</span> <span class="var">$trigger</span>
+
+<span class="cmt"># List / run / remove</span>
+<span class="cmd">Get-ScheduledTask</span>
+<span class="cmd">Start-ScheduledTask</span> <span class="flag">-TaskName</span> <span class="str">"MyJob"</span>
+<span class="cmd">Unregister-ScheduledTask</span> <span class="flag">-TaskName</span> <span class="str">"MyJob"</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     16 · REMOTING
+══════════════════════════════════ -->
+<section class="section" id="remoting">
+  <div class="section-header">
+    <div class="section-icon bg-purple"><span>🌐</span></div>
+    <h2 class="c-purple">Remoting & Network</h2>
+    <span class="tag">advanced</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--purple)"></div><h3>PSRemoting (WinRM)</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Enable remoting (run as admin)</span>
+<span class="cmd">Enable-PSRemoting</span> <span class="flag">-Force</span>
+
+<span class="cmt"># Run command on remote machine</span>
+<span class="cmd">Invoke-Command</span> <span class="flag">-ComputerName</span> Server01 <span class="flag">-ScriptBlock</span> {
+    <span class="cmd">Get-Service</span> WinRM
+}
+
+<span class="cmt"># Interactive session</span>
+<span class="var">$s</span> = <span class="cmd">New-PSSession</span> <span class="flag">-ComputerName</span> Server01
+<span class="cmd">Enter-PSSession</span> <span class="var">$s</span>
+<span class="cmd">Exit-PSSession</span>
+<span class="cmd">Remove-PSSession</span> <span class="var">$s</span>
+
+<span class="cmt"># Multiple machines</span>
+<span class="cmd">Invoke-Command</span> <span class="flag">-ComputerName</span> S1,S2,S3 <span class="flag">-ScriptBlock</span> { <span class="var">$env:COMPUTERNAME</span> }</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--purple)"></div><h3>Web Requests & REST</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># GET request</span>
+<span class="var">$r</span> = <span class="cmd">Invoke-RestMethod</span> <span class="str">"https://api.github.com/users/octocat"</span>
+<span class="var">$r</span>.name
+
+<span class="cmt"># POST with JSON</span>
+<span class="var">$body</span> = @{ title=<span class="str">"Hello"</span>; body=<span class="str">"World"</span> } | <span class="cmd">ConvertTo-Json</span>
+<span class="cmd">Invoke-RestMethod</span> <span class="flag">-Uri</span> <span class="str">"https://api.example.com/posts"</span> `
+    <span class="flag">-Method</span> POST <span class="flag">-Body</span> <span class="var">$body</span> <span class="flag">-ContentType</span> <span class="str">"application/json"</span>
+
+<span class="cmt"># With headers / auth</span>
+<span class="var">$headers</span> = @{ Authorization = <span class="str">"Bearer </span><span class="var">$token</span><span class="str">"</span> }
+<span class="cmd">Invoke-RestMethod</span> <span class="flag">-Uri</span> <span class="var">$url</span> <span class="flag">-Headers</span> <span class="var">$headers</span>
+
+<span class="cmt"># Download file</span>
+<span class="cmd">Invoke-WebRequest</span> <span class="str">"https://example.com/file.zip"</span> <span class="flag">-OutFile</span> file.zip</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     17 · PRO TIPS
+══════════════════════════════════ -->
+<section class="section" id="tips">
+  <div class="section-header">
+    <div class="section-icon bg-yellow"><span>⭐</span></div>
+    <h2 class="c-yellow">Pro Tips & One-Liners</h2>
+    <span class="tag">advanced</span>
+  </div>
+  <div class="grid grid-2">
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--yellow)"></div><h3>Useful One-Liners</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Top 5 memory-hungry processes</span>
+<span class="cmd">Get-Process</span> | <span class="cmd">Sort-Object</span> WS <span class="flag">-Desc</span> | <span class="cmd">Select-Object</span> <span class="flag">-First</span> <span class="num">5</span> Name,WS
+
+<span class="cmt"># All .log files modified today</span>
+<span class="cmd">Get-ChildItem</span> <span class="flag">-Recurse</span> <span class="flag">-Filter</span> *.log |
+    <span class="cmd">Where-Object</span> LastWriteTime <span class="flag">-gt</span> (<span class="cmd">Get-Date</span>).Date
+
+<span class="cmt"># Count lines in a file</span>
+(<span class="cmd">Get-Content</span> big.log).Count
+
+<span class="cmt"># Find text recursively</span>
+<span class="cmd">Select-String</span> <span class="flag">-Path</span> .\* <span class="flag">-Pattern</span> <span class="str">"TODO"</span> <span class="flag">-Recurse</span>
+
+<span class="cmt"># Kill all notepad instances</span>
+<span class="cmd">Get-Process</span> notepad | <span class="cmd">Stop-Process</span>
+
+<span class="cmt"># Disk usage summary</span>
+<span class="cmd">Get-PSDrive</span> <span class="flag">-PSProvider</span> FileSystem | <span class="cmd">Select-Object</span> Name,Used,Free
+
+<span class="cmt"># List open TCP connections</span>
+<span class="cmd">Get-NetTCPConnection</span> <span class="flag">-State</span> Established</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--yellow)"></div><h3>Splatting</h3></div>
+      <div class="card-body">
+        <p class="desc">Pass parameters as a hashtable — keeps long commands readable.</p>
+        <div class="code-block">
+<span class="cmt"># Without splatting (messy)</span>
+<span class="cmd">Copy-Item</span> <span class="flag">-Path</span> src <span class="flag">-Destination</span> dst <span class="flag">-Recurse</span> <span class="flag">-Force</span>
+
+<span class="cmt"># With splatting (clean)</span>
+<span class="var">$params</span> = @{
+    Path        = <span class="str">"src"</span>
+    Destination = <span class="str">"dst"</span>
+    Recurse     = <span class="kw">$true</span>
+    Force       = <span class="kw">$true</span>
+}
+<span class="cmd">Copy-Item</span> @params</div>
+        <div class="note tip"><b>💡</b> Use <code>@params</code> (@ not $) when calling with a splatted hashtable.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--green)"></div><h3>Calculated Properties</h3></div>
+      <div class="card-body">
+        <p class="desc">Add custom columns on the fly with Select-Object.</p>
+        <div class="code-block">
+<span class="cmd">Get-Process</span> | <span class="cmd">Select-Object</span> Name,
+    @{<span class="str">Name</span>=<span class="str">"MB"</span>; <span class="str">Expression</span>={[<span class="typ">math</span>]::Round(<span class="var">$_</span>.WS/1MB, <span class="num">1</span>)}},
+    @{<span class="str">N</span>=<span class="str">"CPU_s"</span>; <span class="str">E</span>={[<span class="typ">math</span>]::Round(<span class="var">$_</span>.CPU, <span class="num">2</span>)}} |
+<span class="cmd">Sort-Object</span> MB <span class="flag">-Descending</span> |
+<span class="cmd">Select-Object</span> <span class="flag">-First</span> <span class="num">5</span> |
+<span class="cmd">Format-Table</span> <span class="flag">-AutoSize</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--green)"></div><h3>Useful Aliases & Shortcuts</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Common built-in aliases</span>
+<span class="cmd">ls</span>  → Get-ChildItem    <span class="cmd">cd</span>  → Set-Location
+<span class="cmd">cp</span>  → Copy-Item        <span class="cmd">mv</span>  → Move-Item
+<span class="cmd">rm</span>  → Remove-Item      <span class="cmd">cat</span> → Get-Content
+<span class="cmd">echo</span>→ Write-Output     <span class="cmd">ps</span>  → Get-Process
+<span class="cmd">kill</span>→ Stop-Process     <span class="cmd">pwd</span> → Get-Location
+<span class="cmd">?</span>   → Where-Object     <span class="cmd">%</span>   → ForEach-Object
+
+<span class="cmt"># Create custom alias</span>
+<span class="cmd">Set-Alias</span> <span class="flag">-Name</span> np <span class="flag">-Value</span> notepad
+<span class="cmd">New-Alias</span> grep <span class="cmd">Select-String</span>
+
+<span class="cmt"># List all aliases</span>
+<span class="cmd">Get-Alias</span>
+<span class="cmd">Get-Alias</span> <span class="flag">-Name</span> ls</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--blue)"></div><h3>String Formatting & Output</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Write-Host vs Write-Output</span>
+<span class="cmd">Write-Host</span> <span class="str">"To console only"</span> <span class="flag">-ForegroundColor</span> Cyan
+<span class="cmd">Write-Output</span> <span class="str">"To pipeline"</span>    <span class="cmt"># can be captured</span>
+
+<span class="cmt"># Debug / Verbose / Warning streams</span>
+<span class="cmd">Write-Debug</span>   <span class="str">"Debug msg"</span>   <span class="cmt"># needs $DebugPreference</span>
+<span class="cmd">Write-Verbose</span> <span class="str">"Verbose msg"</span> <span class="cmt"># needs -Verbose flag</span>
+<span class="cmd">Write-Warning</span> <span class="str">"Warning!"</span>
+<span class="cmd">Write-Error</span>   <span class="str">"Error!"</span>
+<span class="cmd">Write-Information</span> <span class="str">"Info"</span>
+
+<span class="cmt"># Number formatting</span>
+<span class="str">"{0:N2}"</span> <span class="op">-f</span> <span class="num">12345.678</span>    <span class="cmt"># 12,345.68</span>
+<span class="str">"{0:C}"</span>  <span class="op">-f</span> <span class="num">9.99</span>         <span class="cmt"># $9.99</span>
+<span class="str">"{0:X}"</span>  <span class="op">-f</span> <span class="num">255</span>          <span class="cmt"># FF (hex)</span>
+<span class="str">"{0:P1}"</span> <span class="op">-f</span> <span class="num">0.856</span>        <span class="cmt"># 85.6%</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="dot" style="background:var(--blue)"></div><h3>Secrets & Credentials</h3></div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="cmt"># Secure string</span>
+<span class="var">$sec</span> = <span class="cmd">Read-Host</span> <span class="str">"Password"</span> <span class="flag">-AsSecureString</span>
+
+<span class="cmt"># PSCredential object</span>
+<span class="var">$cred</span> = <span class="cmd">Get-Credential</span>
+
+<span class="cmt"># Convert secure ↔ plain (use with care!)</span>
+<span class="var">$plain</span> = [<span class="typ">Runtime.InteropServices.Marshal</span>]::PtrToStringAuto(
+    [<span class="typ">Runtime.InteropServices.Marshal</span>]::SecureStringToBSTR(<span class="var">$sec</span>)
+)
+
+<span class="cmt"># Use credential with cmdlets</span>
+<span class="cmd">Get-WmiObject</span> Win32_OS <span class="flag">-ComputerName</span> Server01 <span class="flag">-Credential</span> <span class="var">$cred</span>
+
+<span class="cmt"># Save / load encrypted (Windows only)</span>
+<span class="var">$sec</span> | <span class="cmd">ConvertFrom-SecureString</span> | <span class="cmd">Out-File</span> pw.txt
+<span class="var">$sec</span> = <span class="cmd">Get-Content</span> pw.txt | <span class="cmd">ConvertTo-SecureString</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+</div><!-- /container -->
+
+<footer>
+  PowerShell Ultimate Cheat Sheet · PS 7.4+ · Cross-platform (Windows · Linux · macOS)
+  · <span style="color:var(--blue)">pwsh --version</span> to check yours
+</footer>
+
+</body>
+</html>
