@@ -1,0 +1,1 @@
+Write-Host "Hello, World! My first PowerShell script is running."
