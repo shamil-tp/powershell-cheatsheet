@@ -9,3 +9,4 @@ if ($result) {
 }else {
     Write-Host "noting to commit"
 }
+Set-Location .\NextJs
