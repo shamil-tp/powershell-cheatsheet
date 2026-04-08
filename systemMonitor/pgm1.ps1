@@ -1,2 +1,2 @@
 Get-ComputerInfo
-Get-CimInstance
+Get-CimInstance Win32_Battery
