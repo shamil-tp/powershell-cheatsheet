@@ -75,22 +75,23 @@ Write-Host ""
 
 #KURAMA
 function fox{
-    params(
+    param(
         # Parameter help description
         [Parameter(Mandatory = $false)]
-        [ValidateSet("github","gemini","gpt","youtube")]
+        [ArgumentCompletions("github","gemini","gpt","youtube")]
         [string]$url
     )
-    if($url -eq "github"){
-        Start-Process firefox github.com/shamil-tp
-    }elseif ($url -eq "gemini") {
-        Start-Process firefox gemini.goolge.com
-    }elseif($url -eq "gpt"){
-        Start-Process firefox chatgpt.com
-    }elseif($url -eq "youtube"){
-        Start-Process firefox youtube.com
-    }else{
-        #validate url here
-        Start-Process firefox $url
+    switch ($url) {
+        "github" { Start-Process firefox "github.com/shamil-tp"}
+        "gemini" { Start-Process firefox "gemini.goolge.com"}
+        "gpt" { Start-Process firefox "chatgpt.com"}
+        "youtube" {Start-Process firefox "youtube.com"}
+        Default {if($url){
+            Start-Process firefox $url
+        }else{
+            Start-Process firefox
+        }
     }
+    }
+    
 }
