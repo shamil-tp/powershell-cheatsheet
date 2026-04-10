@@ -50,20 +50,25 @@ function s {
     Set-Location -Path \/works
     $projects = Get-ChildItem
 $i = 1
-
+$j = 1
 foreach ($project in $projects) {
     # This forces every item to take up exactly 30 characters of terminal space
     $formattedName = $project.Name.PadRight(30)
-    
+    if($j -ne $x){
+        write-host "$j-[ " -NoNewline
+
+    }
+    $x = $j
     Write-Host $formattedName -NoNewline -ForegroundColor Cyan
     
     # Break the line every 3 items
     if ($i % 3 -eq 0) {
+        $j++
         Write-Host "`n" # An empty Write-Host creates a perfectly clean new line
     }
     $i++
 }
 
-# This drops your terminal prompt to a clean line if your list doesn't end perfectly on a multiple of 3
 Write-Host ""
+
 }
