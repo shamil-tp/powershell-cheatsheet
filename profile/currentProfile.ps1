@@ -77,7 +77,7 @@ Write-Host ""
 function fox{
     params(
         # Parameter help description
-        [Parameter(Mandatory = False)]
+        [Parameter(Mandatory = $false)]
         [ValidateSet("github","gemini","gpt","youtube")]
         [string]$url
     )
