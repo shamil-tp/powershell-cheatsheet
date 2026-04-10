@@ -59,7 +59,7 @@ foreach ($project in $projects) {
     
     # Break the line every 3 items
     if ($i % 3 -eq 0) {
-        Write-Host "" # An empty Write-Host creates a perfectly clean new line
+        Write-Host "`n" # An empty Write-Host creates a perfectly clean new line
     }
     $i++
 }
