@@ -72,3 +72,25 @@ foreach ($project in $projects) {
 Write-Host ""
 
 }
+
+#KURAMA
+function fox{
+    params(
+        # Parameter help description
+        [Parameter(Mandatory = False)]
+        [ValidateSet("github","gemini","gpt","youtube")]
+        [string]$url
+    )
+    if($url -eq "github"){
+        Start-Process firefox github.com/shamil-tp
+    }elseif ($url -eq "gemini") {
+        Start-Process firefox gemini.goolge.com
+    }elseif($url -eq "gpt"){
+        Start-Process firefox chatgpt.com
+    }elseif($url -eq "youtube"){
+        Start-Process firefox youtube.com
+    }else{
+        #validate url here
+        Start-Process firefox $url
+    }
+}
