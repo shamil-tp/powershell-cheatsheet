@@ -48,5 +48,13 @@ if($result -match "nothing to commit"){
 function s {
     Clear-Host
     Set-Location -Path \/works
-    Get-ChildItem
+    $projects = Get-ChildItem | Select-Object Name
+    $i = 1
+    foreach($project in $projects){
+        Write-Host "$($project.Name)    " -NoNewLine -ForegroundColor Cyan
+        if($i % 3 -eq 0){
+            Write-Host " "
+        }
+        $i++
+    }
 }
