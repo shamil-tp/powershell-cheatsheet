@@ -95,3 +95,5 @@ function fox{
     }
     
 }
+
+this is tiring so all of this to work I need to always depend on administrator powershell
