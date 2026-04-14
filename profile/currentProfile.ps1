@@ -98,4 +98,7 @@ function fox{
 function obbot{
     Set-Location "C:\Users\MSI PC\AppData\Roaming\MetaQuotes\Terminal\D0E8209F77C8CF37AD8BF550E51FF075\MQL5\Experts\OB_REJECTION_BOT"
 }
+function neo {
+    ssh shamil_tp@100.117.240.33
+}
 this is tiring so all of this to work I need to always depend on administrator powershell
