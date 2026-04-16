@@ -1,35 +1,35 @@
-# function tem{
-#     # 1. The Action
-# $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -WindowStyle Hidden -NoProfile -NonInteractive -File C:\works\FinalTask\runner.ps1"
+# =========================================================
+# 1. THE ENGINE (Your custom reusable tool)
+# =========================================================
+function Install-MyTask {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$path,
 
-# # 2. The Trigger (Runs every day at 9:00 AM)
-# $trigger = New-ScheduledTaskTrigger -Daily -At 9:00AM
+        [Parameter(Mandatory=$true)]
+        [string]$taskName,
 
-# # 3. The Identity (Runs completely silently under your profile)
-# $badge = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType S4U -RunLevel Highest
-
-# # 4. The Laptop Fix (Runs even if unplugged)
-# $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
-
-# # 5. Lock it into Windows
-# Register-ScheduledTask -TaskName "MyFinalTask" -Action $action -Trigger $trigger -Principal $badge -Settings $settings -Force
-
-# Write-Host "Task successfully and permanently installed." -ForegroundColor Green
-# }
-
-function hello {
-    param (
-        [string]$name
+        [Parameter(Mandatory=$true)]
+        $Trigger 
     )
-    if($name){
-        Write-Host "hello $name funcitioning works"
-    }
-    else{
-        Write-Host "please enter a name"
-    }
     
+    Write-Host "Building task: $taskName..." -ForegroundColor Cyan
+
+    $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -WindowStyle Hidden -NoProfile -NonInteractive -File `"$path`""
+    $badge = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType S4U -RunLevel Highest
+    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+
+    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $Trigger -Principal $badge -Settings $settings -Force
+
+    Write-Host "Task '$taskName' successfully installed!" -ForegroundColor Green
 }
 
-$n = Read-Host "enter your name"
+# =========================================================
+# 2. THE EXECUTION (Where you actually fire the tool)
+# =========================================================
 
-hello($n)
+# Build the specific trigger
+$weeklyTrigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Sunday -At 2:00AM
+
+# Hand it to your function
+Install-MyTask -path "C:\works\LogSweeper.ps1" -taskName "SundaySweeper" -Trigger $weeklyTrigger
