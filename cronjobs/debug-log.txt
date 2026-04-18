@@ -1,12 +1,12 @@
 ﻿**********************
 Windows PowerShell transcript start
-Start time: 20260418000504
+Start time: 20260418235105
 Username: WORKGROUP\SYSTEM
 RunAs User: WORKGROUP\SYSTEM
 Configuration Name: 
 Machine: MSI (Microsoft Windows NT 10.0.26200.0)
 Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File C:\works\ps_is_no_bs\cheatsheet\cronjobs\hello.ps1
-Process ID: 772
+Process ID: 18376
 PSVersion: 5.1.26100.8115
 PSEdition: Desktop
 PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.8115
@@ -19,5 +19,5 @@ SerializationVersion: 1.1.0.1
 Transcript started, output file is C:\works\ps_is_no_bs\cheatsheet\cronjobs\debug-log.txt
 **********************
 Windows PowerShell transcript end
-End time: 20260418000505
+End time: 20260418235105
 **********************
